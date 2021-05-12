@@ -183,7 +183,7 @@ var MIME_TYPE_JPEG = 'image/jpeg'; // RegExps
 var REGEXP_ACTIONS = /^e|w|s|n|se|sw|ne|nw|all|crop|move|zoom$/;
 var REGEXP_DATA_URL = /^data:/;
 var REGEXP_DATA_URL_JPEG = /^data:image\/jpeg;base64,/;
-var REGEXP_TAG_NAME = /^img|canvas$/i; // Misc
+var REGEXP_TAG_NAME = /^img|image|canvas$/i; // Misc
 // Inspired by the default width and height of a canvas element.
 
 var MIN_CONTAINER_WIDTH = 200;
@@ -3243,10 +3243,14 @@ var Cropper = /*#__PURE__*/function () {
 
       element[NAMESPACE] = this;
 
-      if (tagName === 'img') {
+      if (tagName === 'img' || tagName === 'image' ) {
         this.isImg = true; // e.g.: "img/picture.jpg"
+        if( tagName === 'img' ) {
+          url = element.getAttribute('src') || '';
+        } else {
+          url = element.getAttribute('href') || '';
+        }
 
-        url = element.getAttribute('src') || '';
         this.originalUrl = url; // Stop when it's a blank image
 
         if (!url) {
@@ -3254,7 +3258,8 @@ var Cropper = /*#__PURE__*/function () {
         } // e.g.: "https://example.com/img/picture.jpg"
 
 
-        url = element.src;
+        // url = tagName = 'img' ? element.src : element.href.baseVal;
+
       } else if (tagName === 'canvas' && window.HTMLCanvasElement) {
         url = element.toDataURL();
       }
@@ -3479,7 +3484,7 @@ var Cropper = /*#__PURE__*/function () {
           options = this.options,
           image = this.image; // Create cropper elements
 
-      var container = element.parentNode;
+      var container = this.options.container === undefined ? element.parentNode : this.options.container;
       var template = document.createElement('div');
       template.innerHTML = TEMPLATE;
       var cropper = template.querySelector(".".concat(NAMESPACE, "-container"));

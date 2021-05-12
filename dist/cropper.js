@@ -189,7 +189,7 @@
   var REGEXP_ACTIONS = /^e|w|s|n|se|sw|ne|nw|all|crop|move|zoom$/;
   var REGEXP_DATA_URL = /^data:/;
   var REGEXP_DATA_URL_JPEG = /^data:image\/jpeg;base64,/;
-  var REGEXP_TAG_NAME = /^img|canvas$/i; // Misc
+  var REGEXP_TAG_NAME = /^img|image|canvas$/i; // Misc
   // Inspired by the default width and height of a canvas element.
 
   var MIN_CONTAINER_WIDTH = 200;
@@ -3249,21 +3249,26 @@
 
         element[NAMESPACE] = this;
 
-        if (tagName === 'img') {
-          this.isImg = true; // e.g.: "img/picture.jpg"
-
+      if (tagName === 'img' || tagName === 'image' ) {
+        this.isImg = true; // e.g.: "img/picture.jpg"
+        if( tagName === 'img' ) {
           url = element.getAttribute('src') || '';
-          this.originalUrl = url; // Stop when it's a blank image
+        } else {
+          url = element.getAttribute('href') || '';
+        }
+
+        this.originalUrl = url; // Stop when it's a blank image
 
           if (!url) {
             return;
           } // e.g.: "https://example.com/img/picture.jpg"
 
 
-          url = element.src;
-        } else if (tagName === 'canvas' && window.HTMLCanvasElement) {
-          url = element.toDataURL();
-        }
+        // url = tagName = 'img' ? element.src : element.href.baseVal;
+
+      } else if (tagName === 'canvas' && window.HTMLCanvasElement) {
+        url = element.toDataURL();
+      }
 
         this.load(url);
       }
@@ -3485,22 +3490,22 @@
             options = this.options,
             image = this.image; // Create cropper elements
 
-        var container = element.parentNode;
-        var template = document.createElement('div');
-        template.innerHTML = TEMPLATE;
-        var cropper = template.querySelector(".".concat(NAMESPACE, "-container"));
-        var canvas = cropper.querySelector(".".concat(NAMESPACE, "-canvas"));
-        var dragBox = cropper.querySelector(".".concat(NAMESPACE, "-drag-box"));
-        var cropBox = cropper.querySelector(".".concat(NAMESPACE, "-crop-box"));
-        var face = cropBox.querySelector(".".concat(NAMESPACE, "-face"));
-        this.container = container;
-        this.cropper = cropper;
-        this.canvas = canvas;
-        this.dragBox = dragBox;
-        this.cropBox = cropBox;
-        this.viewBox = cropper.querySelector(".".concat(NAMESPACE, "-view-box"));
-        this.face = face;
-        canvas.appendChild(image); // Hide the original image
+      var container = this.options.container === undefined ? element.parentNode : this.options.container;
+      var template = document.createElement('div');
+      template.innerHTML = TEMPLATE;
+      var cropper = template.querySelector(".".concat(NAMESPACE, "-container"));
+      var canvas = cropper.querySelector(".".concat(NAMESPACE, "-canvas"));
+      var dragBox = cropper.querySelector(".".concat(NAMESPACE, "-drag-box"));
+      var cropBox = cropper.querySelector(".".concat(NAMESPACE, "-crop-box"));
+      var face = cropBox.querySelector(".".concat(NAMESPACE, "-face"));
+      this.container = container;
+      this.cropper = cropper;
+      this.canvas = canvas;
+      this.dragBox = dragBox;
+      this.cropBox = cropBox;
+      this.viewBox = cropper.querySelector(".".concat(NAMESPACE, "-view-box"));
+      this.face = face;
+      canvas.appendChild(image); // Hide the original image
 
         addClass(element, CLASS_HIDDEN); // Inserts the cropper after to the current image
 
